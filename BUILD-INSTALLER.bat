@@ -77,15 +77,23 @@ set SCRIPT_DIR=%~dp0
 set BUILD_TEMP=%SCRIPT_DIR%build-temp
 set FINANCE_OUT=%BUILD_TEMP%\Potta Finance
 set API_OUT=%BUILD_TEMP%\PottaAPI
+set KDS_OUT=%BUILD_TEMP%\PottaKDS
 
 REM Clean build-temp
 if exist "%BUILD_TEMP%" rmdir /s /q "%BUILD_TEMP%"
 mkdir "%BUILD_TEMP%"
 mkdir "%FINANCE_OUT%"
 mkdir "%API_OUT%"
+mkdir "%KDS_OUT%"
 
 echo.
-echo [1/3] Publishing Potta Finance (WPF)...
+echo Restoring dependencies for win-x64...
+dotnet restore "..\Potta Finance\Potta Finance.csproj" -r win-x64
+dotnet restore "..\PottaAPI\PottaAPI.csproj" -r win-x64
+dotnet restore "..\PottaKDS\PottaKDS.csproj" -r win-x64
+
+echo.
+echo [1/4] Publishing Potta Finance (WPF)...
 
 REM ------------------------------------------
 REM IMPORTANT: We use --self-contained true so that ALL .NET 8 runtime assemblies
@@ -160,7 +168,7 @@ if "%MISSING%"=="1" (
 echo [OK] All critical WPF runtime assemblies present.
 
 echo.
-echo [2/3] Publishing PottaAPI...
+echo [2/4] Publishing PottaAPI (Core Engine)...
 dotnet publish "..\PottaAPI\PottaAPI.csproj" ^
     -c Release ^
     -r win-x64 ^
@@ -180,7 +188,51 @@ if not exist "%API_OUT%\Microsoft.Data.Sqlite.dll" (
 )
 
 echo.
-echo [3/3] Compiling installer with Inno Setup...
+echo [3/4] Publishing PottaKDS (Kitchen Display System)...
+dotnet publish "..\PottaKDS\PottaKDS.csproj" ^
+    -c Release ^
+    -r win-x64 ^
+    --self-contained true ^
+    -p:PublishSingleFile=false ^
+    -p:APP_VERSION=%VERSION% ^
+    -o "%KDS_OUT%"
+
+if errorlevel 1 (
+    echo [ERROR] PottaKDS publish failed!
+    pause
+    exit /b 1
+)
+
+echo.
+echo Verifying critical runtime assemblies in PottaKDS publish output...
+set KDS_MISSING=0
+
+if not exist "%KDS_OUT%\WindowsBase.dll" (
+    echo [ERROR] Missing in KDS: WindowsBase.dll
+    set KDS_MISSING=1
+)
+if not exist "%KDS_OUT%\PresentationCore.dll" (
+    echo [ERROR] Missing in KDS: PresentationCore.dll
+    set KDS_MISSING=1
+)
+if not exist "%KDS_OUT%\PresentationFramework.dll" (
+    echo [ERROR] Missing in KDS: PresentationFramework.dll
+    set KDS_MISSING=1
+)
+
+if "%KDS_MISSING%"=="1" (
+    echo.
+    echo [ERROR] One or more critical assemblies are missing from PottaKDS publish output.
+    echo         Path: %KDS_OUT%
+    echo Aborting installer build.
+    pause
+    exit /b 1
+)
+
+echo [OK] All critical PottaKDS runtime assemblies present.
+
+echo.
+echo [4/4] Compiling installer with Inno Setup...
 
 "%INNO_PATH%" /dMyAppVersion=%VERSION% /dSourceDir="%BUILD_TEMP%" "PottaSetup-Professional.iss"
 

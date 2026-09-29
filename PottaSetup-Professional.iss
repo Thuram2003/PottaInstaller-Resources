@@ -1,15 +1,15 @@
 ; ============================================================================
 ; Potta Finance - Professional Installer Script
 ; ============================================================================
-; Version: 1.3.4.5
 ; Created with Inno Setup 6.7
 ; 
 ; This installer provides a modern, professional installation experience
 ; with custom branding, comprehensive license agreements, and user-friendly
-; interface following industry best practices.
+; component selection for Potta POS, Potta KDS, and the core API engine.
 ; ============================================================================
 
 #define MyAppName "Potta Finance POS"
+#define MyKdsName "Potta KDS"
 // MyAppVersion is injected by BUILD-INSTALLER.bat via: /dMyAppVersion=<version>
 #ifndef MyAppVersion
 #define MyAppVersion "0.0.0.0"
@@ -22,7 +22,9 @@
 #define MyAppURL "https://www.instanvi.com/"
 #define MyAppExeName "Potta Finance.exe"
 #define MyApiExeName "PottaAPI.exe"
+#define MyKdsExeName "PottaKDS.exe"
 #define MyAppDescription "Professional Point of Sale & Finance Management System"
+#define MyKdsDescription "Kitchen Display System for Kitchen Screens"
 
 [Setup]
 ; ============================================================================
@@ -84,7 +86,6 @@ WizardStyle=modern
 WizardImageFile=potta_wizard_large.png
 WizardSmallImageFile=potta_wizard_small.png
 DisableWelcomePage=no
-WindowVisible=no
 ShowLanguageDialog=auto
 
 ; ============================================================================
@@ -121,56 +122,105 @@ DirExistsWarning=auto
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 
+[CustomMessages]
+; ============================================================================
+; Custom Multilingual UI Strings
+; ============================================================================
+english.TypeStandard=Standard POS Station (Recommended)
+english.TypeStandardDesc=Installs Potta POS and its background API server for standard store checkout.
+english.TypeRestaurant=Restaurant & Cafe Setup (POS + KDS)
+english.TypeRestaurantDesc=Installs Potta POS (with API server) and Potta KDS (Kitchen Display System).
+english.TypeKdsOnly=Kitchen Display Station Only
+english.TypeKdsOnlyDesc=Installs Potta KDS for a dedicated kitchen screen connecting over LAN to the POS.
+english.TypeCustom=Custom Installation
+english.TypeCustomDesc=Select the exact applications you want to install.
+
+english.CompPos=Potta POS - Point of Sale & Finance Management (Includes API Backend)
+english.CompKds=Potta KDS - Kitchen Display System (For kitchen order screens)
+
+english.LaunchPos=Launch Potta Finance POS
+english.LaunchKds=Launch Potta KDS (Kitchen Display System)
+english.PosDesktopIcon=Create Potta POS desktop shortcut
+english.KdsDesktopIcon=Create Potta KDS desktop shortcut
+
+french.TypeStandard=Station POS Standard (Recommandé)
+french.TypeStandardDesc=Installe Potta POS et son serveur API pour l'encaissement en magasin.
+french.TypeRestaurant=Configuration Restaurant & Café (POS + KDS)
+french.TypeRestaurantDesc=Installe Potta POS (avec serveur API) et Potta KDS (Affichage Cuisine).
+french.TypeKdsOnly=Station Affichage Cuisine Uniquement
+french.TypeKdsOnlyDesc=Installe Potta KDS pour un écran cuisine dédié connecté en réseau au POS.
+french.TypeCustom=Installation Personnalisée
+french.TypeCustomDesc=Sélectionnez les applications spécifiques à installer.
+
+french.CompPos=Potta POS - Point de Vente & Gestion Financière (Inclut le serveur API)
+french.CompKds=Potta KDS - Système d'Affichage Cuisine (Pour écrans de commande)
+
+french.LaunchPos=Lancer Potta Finance POS
+french.LaunchKds=Lancer Potta KDS (Affichage Cuisine)
+french.PosDesktopIcon=Créer un raccourci de bureau pour Potta POS
+french.KdsDesktopIcon=Créer un raccourci de bureau pour Potta KDS
+
+[Types]
+; ============================================================================
+; Installation Types
+; ============================================================================
+Name: "standard"; Description: "{cm:TypeStandard}"
+Name: "restaurant"; Description: "{cm:TypeRestaurant}"
+Name: "kds_only"; Description: "{cm:TypeKdsOnly}"
+Name: "custom"; Description: "{cm:TypeCustom}"; Flags: iscustom
+
+[Components]
+; ============================================================================
+; Selectable Application Components
+; ============================================================================
+Name: "pos"; Description: "{cm:CompPos}"; Types: standard restaurant custom; Flags: checkablealone
+Name: "kds"; Description: "{cm:CompKds}"; Types: restaurant kds_only custom; Flags: checkablealone
+
 [Tasks]
 ; ============================================================================
-; Installation Tasks
+; Desktop Shortcuts
 ; ============================================================================
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1; Check: not IsAdminInstallMode
 
 [Files]
 ; ============================================================================
 ; Application Files
 ; ============================================================================
-; Main WPF Application
-Source: "{#SourceDir}\Potta Finance\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourceDir}\Potta Finance\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.pdb,*.xml"
 
-; API Server
+; Main WPF POS Application (Installed if 'pos' component is selected)
+Source: "{#SourceDir}\Potta Finance\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion; Components: pos
+Source: "{#SourceDir}\Potta Finance\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.pdb,*.xml"; Components: pos
+
+; Core API Server (Backend engine for Potta POS - installed with POS)
 ; Keep API binaries in a dedicated subfolder to prevent DLL collisions
 ; with the WPF desktop runtime files (e.g., WindowsBase.dll).
-Source: "{#SourceDir}\PottaAPI\{#MyApiExeName}"; DestDir: "{app}\PottaAPI"; Flags: ignoreversion
-Source: "{#SourceDir}\PottaAPI\*"; DestDir: "{app}\PottaAPI"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.pdb,*.xml"
+Source: "{#SourceDir}\PottaAPI\{#MyApiExeName}"; DestDir: "{app}\PottaAPI"; Flags: ignoreversion; Components: pos
+Source: "{#SourceDir}\PottaAPI\*"; DestDir: "{app}\PottaAPI"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.pdb,*.xml"; Components: pos
+
+; Potta KDS Application (Installed if 'kds' component is selected)
+; Kept in a dedicated subfolder to prevent WPF DLL collision with main app
+Source: "{#SourceDir}\PottaKDS\{#MyKdsExeName}"; DestDir: "{app}\PottaKDS"; Flags: ignoreversion; Components: kds
+Source: "{#SourceDir}\PottaKDS\*"; DestDir: "{app}\PottaKDS"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.pdb,*.xml"; Components: kds
 
 [Icons]
 ; ============================================================================
 ; Shortcuts
 ; ============================================================================
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Comment: "{#MyAppDescription}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; Comment: "{#MyAppDescription}"
+
+; Potta POS Shortcuts
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Comment: "{#MyAppDescription}"; Components: pos
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; Comment: "{#MyAppDescription}"; Components: pos
+
+; Potta KDS Shortcuts
+Name: "{autoprograms}\{#MyKdsName}"; Filename: "{app}\PottaKDS\{#MyKdsExeName}"; Comment: "{#MyKdsDescription}"; Components: kds
+Name: "{autodesktop}\{#MyKdsName}"; Filename: "{app}\PottaKDS\{#MyKdsExeName}"; Tasks: desktopicon; Comment: "{#MyKdsDescription}"; Components: kds
 
 [Run]
 ; ============================================================================
-; Post-Installation Actions
+; Post-Installation Actions (Only prompts for components that were installed)
 ; ============================================================================
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
-
-; ============================================================================
-; NOTE: [InstallDelete] section removed intentionally.
-;
-; The previous version deleted WindowsBase.dll during every install/upgrade,
-; which caused a fatal crash:
-;   System.IO.FileNotFoundException: Could not load file or assembly
-;   'WindowsBase, Version=8.0.0.0'
-;
-; For self-contained .NET 8 WPF apps, WindowsBase.dll is a REQUIRED runtime
-; assembly included in the publish output. It must NEVER be deleted.
-;
-; If you are upgrading from a very old framework-dependent version that shipped
-; a stale WindowsBase v4.0 DLL, the [Files] section above uses `Flags: ignoreversion`
-; which means the new file from the publish output always overwrites whatever is
-; currently on disk making manual pre-deletion unnecessary.
-; ============================================================================
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchPos}"; Flags: nowait postinstall skipifsilent; Components: pos
+Filename: "{app}\PottaKDS\{#MyKdsExeName}"; Description: "{cm:LaunchKds}"; Flags: nowait postinstall skipifsilent unchecked; Components: kds
 
 [UninstallDelete]
 ; ============================================================================
@@ -178,9 +228,9 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 ; ============================================================================
 Type: filesandordirs; Name: "{app}\logs"
 Type: filesandordirs; Name: "{app}\temp"
+Type: filesandordirs; Name: "{app}\PottaAPI\logs"
+Type: filesandordirs; Name: "{app}\PottaKDS\logs"
 Type: files; Name: "{app}\*.log"
-; Never delete user data on normal uninstall. User data is stored in:
-; {localappdata}\Instanvi\Potta Finance POS\
 
 [Code]
 function L(const EnglishText, FrenchText: String): String;
@@ -207,8 +257,6 @@ begin
   Result := True;
 
   // Self-contained builds do not require .NET runtime on the machine.
-  // Framework-dependent builds do. We keep this check non-blocking: if dotnet isn't found,
-  // show info but allow installation to continue (the app itself will display errors if needed).
   DotNetInstalled := Exec('dotnet', '--list-runtimes', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 
   if (not DotNetInstalled) or (ResultCode <> 0) then
@@ -222,7 +270,6 @@ begin
     begin
       ShellExec('open', 'https://dotnet.microsoft.com/en-us/download/dotnet/8.0', '', '', SW_SHOW, ewNoWait, ResultCode);
     end;
-    // Do not hard-block installation; allow self-contained installs to proceed.
     Result := True;
   end;
 end;
@@ -239,7 +286,6 @@ end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
-  ResultCode: Integer;
   DataDir: String;
 begin
   if CurUninstallStep = usPostUninstall then
@@ -292,12 +338,21 @@ begin
           L(
             'This wizard will guide you through the installation of ' + '{#MyAppName}' + ', ' +
             'a professional Point of Sale and Finance Management System.' + #13#10 + #13#10 +
-            'It is recommended that you close all other applications before continuing.' + #13#10 + #13#10 +
+            'You can choose to install the POS Terminal, the Kitchen Display System (KDS), or both.' + #13#10 + #13#10 +
             'Click Next to continue, or Cancel to exit Setup.',
             'Cet assistant vous guidera dans l''installation de ' + '{#MyAppName}' + ', ' +
             'un systeme professionnel de point de vente et de gestion financiere.' + #13#10 + #13#10 +
-            'Il est recommande de fermer les autres applications avant de continuer.' + #13#10 + #13#10 +
+            'Vous pouvez choisir d''installer le Terminal POS, le Systeme d''Affichage Cuisine (KDS), ou les deux.' + #13#10 + #13#10 +
             'Cliquez sur Suivant pour continuer, ou sur Annuler pour quitter l''installation.'
+          );
+      end;
+    wpSelectComponents:
+      begin
+        WizardForm.PageNameLabel.Caption := L('Select Components', 'Selectionner les composants');
+        WizardForm.PageDescriptionLabel.Caption :=
+          L(
+            'Choose the applications you want to install for your store configuration.',
+            'Choisissez les applications a installer selon la configuration de votre magasin.'
           );
       end;
     wpFinished:
