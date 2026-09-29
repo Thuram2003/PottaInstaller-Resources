@@ -1,0 +1,35 @@
+END-USER LICENSE AGREEMENT (EULA)
+FOR POTTA FINANCE POS
+
+Copyright (c) 2024 Instanvi Sarl. All rights reserved.
+
+IMPORTANT - READ CAREFULLY: This End-User License Agreement ("EULA") is a legal agreement between you (either an individual or a single entity) and Instanvi Sarl for the Potta Finance POS software product, which includes computer software and may include associated media, printed materials, and online or electronic documentation ("SOFTWARE PRODUCT").
+
+By installing, copying, or otherwise using the SOFTWARE PRODUCT, you agree to be bound by the terms of this EULA. If you do not agree to the terms of this EULA, do not install or use the SOFTWARE PRODUCT.
+
+1. GRANT OF LICENSE
+Instanvi Sarl grants you the following rights:
+- Installation and Use: You may install and use the SOFTWARE PRODUCT on a single computer or device.
+- Backup Copy: You may make one backup copy of the SOFTWARE PRODUCT for archival purposes.
+
+2. RESTRICTIONS
+You may not:
+- Reverse engineer, decompile, or disassemble the SOFTWARE PRODUCT
+- Rent, lease, or lend the SOFTWARE PRODUCT
+- Transfer the SOFTWARE PRODUCT to third parties without written consent
+
+3. SUPPORT AND UPDATES
+Instanvi Sarl may provide support services and updates at its discretion.
+
+4. TERMINATION
+This EULA is effective until terminated. Your rights will terminate automatically without notice if you fail to comply with any term of this EULA.
+
+5. LIMITED WARRANTY
+The SOFTWARE PRODUCT is provided "AS IS" without warranty of any kind.
+
+6. LIMITATION OF LIABILITY
+In no event shall Instanvi Sarl be liable for any damages whatsoever arising out of the use or inability to use the SOFTWARE PRODUCT.
+
+For questions regarding this EULA, please contact:
+Instanvi Sarl
+Website: https://www.instanvi.com/

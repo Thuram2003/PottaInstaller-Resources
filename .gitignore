@@ -1,0 +1,29 @@
+# Build temporary files and published application payloads
+build-temp/
+/build-temp/
+
+# Inno Setup output directory containing generated installer binaries (.exe, .zip, etc.)
+installer-output/
+/installer-output/
+Output/
+/Output/
+
+# Temporary and log files
+*.tmp
+*.temp
+*.log
+_IS*.*
+*.iss.bak
+
+# Python cache (if running image generator script)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+
+# OS-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
